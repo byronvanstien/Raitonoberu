@@ -23,6 +23,7 @@ class NovelUpdatesAPI:
             async with session.get(to_parse) as response:
                 assert isinstance(response, aiohttp.ClientResponse)
                 assert response.status == 200
+            data = {}
             parse_info = BeautifulSoup(await response.text(), 'lxml')
             data['title'] = parse_info.find(class_='seriestitle new')
             data['cover'] = parse_info.find('img').get('src')
