@@ -1,3 +1,5 @@
+import asyncio
+
 import aiohttp
 from bs4 import BeautifulSoup
 
@@ -26,14 +28,15 @@ class NovelUpdatesAPI:
         async with session.get(to_parse) as response:
             assert isinstance(response, aiohttp.ClientResponse)
             assert response.status == 200
-        parse_info = BeautifulSoup(await response.text(), 'lxml')
-        data = {'title': parse_info.find('w-blog-content', attrs={'h4':'seriestitle new'}),
-                'cover': parse_info.find('img', attrs={'img':'src'}),
-                'type': parse_info.find('a', class_='genre type'),
-                'genre': parse_info.find_all('a', class_='genre'),
-                'tags': parse_info.find_all('a', class_='genre odd'),
-                'rating': parse_info.find('span', class_='votetext'),
-                'language': parse_info.find('a', class_='genre lang'),
+            html = await response.text()
+        parse_info = BeautifulSoup(html, 'lxml')
+        data = {'title': parse_info.find('h4', class_='seriestitle new').string,
+                'cover': parse_info.find('img', attrs={'img': 'src'}),
+                'type': parse_info.find('a', class_='genre type').string,
+                'genre': [x.string for x in parse_info.find_all('a', class_='genre')],
+                'tags': [x.string for x in parse_info.find_all('a', class_='genre odd')],
+                'rating': parse_info.find('span', class_='votetext').string,
+                'language': parse_info.find('a', class_='genre lang').string,
                 'author': parse_info.find('a', class_='authtag'),
                 'artist': parse_info.find('a', class_='artiststag'),
                 'year': parse_info.find('div', id_='edityear'),
@@ -43,8 +46,14 @@ class NovelUpdatesAPI:
                 'publisher': parse_info.find('a', class_='genre', id_='myopub'),
                 'english_publisher': parse_info.find('span', class_='seriesna'),
                 'frequency': parse_info.find('h5', class_='seriesother'),
-                'description': parse_info.find('div', attrs={'id': 'editdescription'}),
+                'description': parse_info.find('div', id_='editdescription'),
                 'aliases': parse_info.find('div', id_='editassociated'),
-                'related': parse_info.find('h5', class_='seriesother')}
+                'related': parse_info.find('h5', class_='seriesother'),
+                'link': to_parse}
         session.close()
         return data
+
+if __name__ == '__main__':
+    n = NovelUpdatesAPI()
+    loop = asyncio.get_event_loop()
+    print(loop.run_until_complete(n.page_info_parser('ISSTH')))
