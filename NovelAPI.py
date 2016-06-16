@@ -1,5 +1,4 @@
 import asyncio
-
 import aiohttp
 from bs4 import BeautifulSoup
 
@@ -30,13 +29,13 @@ class NovelUpdatesAPI:
             assert response.status == 200
             html = await response.text()
         parse_info = BeautifulSoup(html, 'lxml')
+        genres = []
         data = {'title': parse_info.find('h4', class_='seriestitle new').string,
-                'cover': parse_info.find('img', attrs={'img': 'src'}),
+                'cover': parse_info.find('img').get('src'),
                 'type': parse_info.find('a', class_='genre type').string,
-                'genre': [x.string for x in parse_info.find_all('a', class_='genre')],
+                'genre': [x.string for x in parse_info.find_all('div', id='seriesgenre')[0].children],
                 'tags': [x.string for x in parse_info.find_all('a', class_='genre odd')],
-                'rating': parse_info.find('span', class_='votetext').string,
-                'language': parse_info.find('a', class_='genre lang').string,
+                'language': parse_info.find('a', class_='genre lang'),
                 'author': parse_info.find('a', class_='authtag'),
                 'artist': parse_info.find('a', class_='artiststag'),
                 'year': parse_info.find('div', id_='edityear'),
@@ -45,15 +44,21 @@ class NovelUpdatesAPI:
                 'completely_translated': parse_info.find('div', id_='showtranslated'),
                 'publisher': parse_info.find('a', class_='genre', id_='myopub'),
                 'english_publisher': parse_info.find('span', class_='seriesna'),
-                'frequency': parse_info.find('h5', class_='seriesother'),
                 'description': parse_info.find('div', id_='editdescription'),
                 'aliases': parse_info.find('div', id_='editassociated'),
                 'related': parse_info.find('h5', class_='seriesother'),
                 'link': to_parse}
+        for items in data['genre']:
+            genres.append(items)
+            if data[items] == ' ' or data[items] == 'newline':
+                del data[items]
+        for i in genres:
+            print(i)
         session.close()
         return data
 
 if __name__ == '__main__':
     n = NovelUpdatesAPI()
     loop = asyncio.get_event_loop()
-    print(loop.run_until_complete(n.page_info_parser('ISSTH')))
+    print(loop.run_until_complete(n.page_info_parser('Sword art online')))
+
