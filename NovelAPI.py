@@ -31,7 +31,7 @@ class NovelUpdatesAPI:
             else:
                 raise aiohttp.ClientResponseError(response.status)
 
-    async def page_info_parser(self, term):
+    async def page_info_parser(self, term: str):
         """
         This function will parse the information from the link that search_novel_updates returns and then return it as a dictionary
 
@@ -54,13 +54,14 @@ class NovelUpdatesAPI:
                         'year': parse_info.find('div', attrs={'id': 'edityear'}).string.strip(),
                         'novel status': parse_info.find('div', attrs={'id': 'editstatus'}).string.strip(),
                         'licensed': parse_info.find('div', attrs={'id': 'showlicensed'}).string.strip(),
-                        'completely translated': parse_info.find('div', attrs={'id': 'showtranslated'}).string.strip(),
+                        'completely translated': parse_info.find('div', attrs={'id': 'showtranslated'}).string.strip(), # Currently broken on some series although seems to work on majority
                         'publisher': parse_info.find('a', attrs={'class': 'genre', 'id': 'myopub'}).string,
                         'english publisher': parse_info.find('span', class_='seriesna').string,
-                        'description': parse_info.find('div', attrs={'id': 'editdescription'}).p.string,
+                        'description': parse_info.find('div', attrs={'id': 'editdescription'}).p.string.strip(), # Currently broken if text is split across multiple <p> tags
                         'aliases': list(set([x.string for x in parse_info.find('div', attrs={'id': 'editassociated'}) if x.string is not None])),
-                        'related': list(set(parse_info.find_all('a', class_='genre'))),  # related novels is in here as well as extras
+                        'related': list(set(parse_info.find_all('a', class_='genre', id_='sid'))),  # Currently returning empty list
                         'link': to_parse}
+                self.session.close()
                 return data
             else:
                 raise aiohttp.ClientResponseError(response.status)
