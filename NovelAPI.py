@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 """
 Currently Broken:
 related
+currently_translated
+description
 """
 
 
@@ -52,16 +54,22 @@ class NovelUpdatesAPI:
                         'authors': list(set([x.string for x in parse_info.find_all('a', attrs={'id': 'authtag'})])),
                         'artists': list(set([x.string for x in parse_info.find_all('span', attrs={'class': 'seriesna'})])),
                         'year': parse_info.find('div', attrs={'id': 'edityear'}).string.strip(),
-                        'novel status': parse_info.find('div', attrs={'id': 'editstatus'}).string.strip(),
+                        'novel_status': parse_info.find('div', attrs={'id': 'editstatus'}).string.strip(),
                         'licensed': parse_info.find('div', attrs={'id': 'showlicensed'}).string.strip(),
-                        'completely translated': parse_info.find('div', attrs={'id': 'showtranslated'}).string.strip(), # Currently broken on some series although seems to work on majority
+                        'completely_translated': parse_info.find('div', attrs={'id': 'showtranslated'}).string.strip(),
                         'publisher': parse_info.find('a', attrs={'class': 'genre', 'id': 'myopub'}).string,
                         'english publisher': parse_info.find('span', class_='seriesna').string,
-                        'description': parse_info.find('div', attrs={'id': 'editdescription'}).p.string.strip(), # Currently broken if text is split across multiple <p> tags
+                        'description': parse_info.find('div', attrs={'id': 'editdescription'}).p.string,
                         'aliases': list(set([x.string for x in parse_info.find('div', attrs={'id': 'editassociated'}) if x.string is not None])),
-                        'related': list(set(parse_info.find_all('a', class_='genre', id_='sid'))),  # Currently returning empty list
+                        'related': list(set(parse_info.find_all('a', class_='genre', id_='sid'))),  # related novels is in here as well as extras
                         'link': to_parse}
-                self.session.close()
                 return data
             else:
                 raise aiohttp.ClientResponseError(response.status)
+
+if __name__ == '__main__':
+    n = NovelUpdatesAPI()
+    loop = asyncio.get_event_loop()
+    print(loop.run_until_complete(n.page_info_parser('Curing incurable diseases with semen')))
+    print(loop.run_until_complete(n.page_info_parser('ISSTH')))
+    print(loop.run_until_complete(n.page_info_parser('Sword art online')))
