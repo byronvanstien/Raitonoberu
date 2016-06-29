@@ -4,9 +4,9 @@ from bs4 import BeautifulSoup
 
 """
 Currently Broken:
-related
-currently_translated
-description
+related - currently shows html as well as some extra
+artist - shows as N/A
+English publisher - gets html tags
 """
 
 
@@ -40,6 +40,7 @@ class NovelUpdatesAPI:
 
         :param term: The novel to search for and parse
         """
+
         to_parse = await self.search_novel_updates(term)
         async with self.session.get(to_parse) as response:
             if response.status == 200:
@@ -51,17 +52,17 @@ class NovelUpdatesAPI:
                         'genre': list(set([x.string for x in list(parse_info.find_all('div', id='seriesgenre')[0].children) if len(x.string.strip()) > 0])),
                         'tags': list(set([x.string for x in list(parse_info.find_all('div', id='showtags')[0].children) if len(x.string.strip()) > 0])),
                         'language': parse_info.find('a', class_='genre lang').string,
-                        'authors': list(set([x.string for x in parse_info.find_all('a', attrs={'id': 'authtag'})])),
-                        'artists': list(set([x.string for x in parse_info.find_all('span', attrs={'class': 'seriesna'})])),
-                        'year': parse_info.find('div', attrs={'id': 'edityear'}).string.strip(),
-                        'novel_status': parse_info.find('div', attrs={'id': 'editstatus'}).string.strip(),
-                        'licensed': parse_info.find('div', attrs={'id': 'showlicensed'}).string.strip(),
-                        'completely_translated': parse_info.find('div', attrs={'id': 'showtranslated'}).string.strip(),
-                        'publisher': parse_info.find('a', attrs={'class': 'genre', 'id': 'myopub'}).string,
-                        'english publisher': parse_info.find('span', class_='seriesna').string,
-                        'description': parse_info.find('div', attrs={'id': 'editdescription'}).p.string,
-                        'aliases': list(set([x.string for x in parse_info.find('div', attrs={'id': 'editassociated'}) if x.string is not None])),
-                        'related': list(set(parse_info.find_all('a', class_='genre', id_='sid'))),  # related novels is in here as well as extras
+                        'authors': list(set([x.string for x in parse_info.find_all('a', id='authtag')])),
+                        'artists': list(set([x.string for x in parse_info.find_all('span', class_='seriesna')])),
+                        'year': parse_info.find('div', id='edityear').string.strip(),
+                        'novel_status': parse_info.find('div', id='editstatus').string.strip(),
+                        'licensed': True if parse_info.find('div', id='showlicensed').string.strip() == 'Yes' else False,
+                        'completely_translated': True if len(list(parse_info.find('div', id='showtranslated').descendants)) > 1 else False,
+                        'publisher': parse_info.find('a', class_='genre', id='myopub').string,
+                        'english publisher': parse_info.find('a', class_='genre', id='myepub'),
+                        'description': ''.join([x.string.strip() for x in list(parse_info.find('div', id='editdescription').children) if x.string.strip()]),
+                        'aliases': list(set([x.string for x in parse_info.find('div', id='editassociated') if x.string is not None])),
+                        'related': list(set(parse_info.find_all('a', class_='genre'))),
                         'link': to_parse}
                 return data
             else:
