@@ -1,6 +1,7 @@
 import asyncio
 import aiohttp
 from bs4 import BeautifulSoup
+import urllib
 
 """
 Currently Broken:
@@ -11,9 +12,10 @@ English publisher - gets html tags
 
 
 class NovelUpdatesAPI:
+
     def __init__(self):
         """The base url that we'll be ripping information from"""
-        self.baseurl = 'http://www.novelupdates.com/'
+        self.BASEURL = 'http://www.novelupdates.com/'
         self.session = aiohttp.ClientSession()
 
     async def search_novel_updates(self, term: str):
@@ -23,13 +25,13 @@ class NovelUpdatesAPI:
 
         :param term: Light Novel to Search For
         """
-        term = term.replace(' ', '+')
-        params = {'s': term, 'post_type': 'seriesplan'}
-        async with self.session.get(self.baseurl, params=params) as response:
+        to_encode = {'s': term, 'post_type': 'seriesplan'}
+        params = urllib.parse.urlencode(to_encode)
+        async with self.session.get(self.BASEURL, params=params) as response:
             if response.status == 200:
                 search = BeautifulSoup(await response.text(), 'lxml')
-                parsedsearch = search.find('a', class_='w-blog-entry-link').get('href')
-                return parsedsearch
+                parsed_search = search.find('a', class_='w-blog-entry-link').get('href')
+                return parsed_search
             else:
                 raise aiohttp.ClientResponseError(response.status)
 
@@ -47,7 +49,7 @@ class NovelUpdatesAPI:
                 html = await response.text()
                 parse_info = BeautifulSoup(html, 'lxml')
                 data = {'title': parse_info.find('h4', class_='seriestitle new').string,
-                        'cover': parse_info.find('img').get('src'),
+                        'cover': None if parse_info.find('img').get('src') == 'http://www.novelupdates.com/img/noimagefound.jpg' else parse_info.find('img').get('src'),
                         'type': parse_info.find('a', class_='genre type').string,
                         'genre': list(set([x.string for x in list(parse_info.find_all('div', id='seriesgenre')[0].children) if len(x.string.strip()) > 0])),
                         'tags': list(set([x.string for x in list(parse_info.find_all('div', id='showtags')[0].children) if len(x.string.strip()) > 0])),
@@ -60,7 +62,7 @@ class NovelUpdatesAPI:
                         'completely_translated': True if len(list(parse_info.find('div', id='showtranslated').descendants)) > 1 else False,
                         'publisher': parse_info.find('a', class_='genre', id='myopub').string,
                         'english publisher': parse_info.find('a', class_='genre', id='myepub'),
-                        'description': ''.join([x.string.strip() for x in list(parse_info.find('div', id='editdescription').children) if x.string.strip()]),
+                        'description': ' '.join([x.string.strip() for x in list(parse_info.find('div', id='editdescription').children) if x.string.strip()]),
                         'aliases': list(set([x.string for x in parse_info.find('div', id='editassociated') if x.string is not None])),
                         'related': list(set(parse_info.find_all('a', class_='genre'))),
                         'link': to_parse}
