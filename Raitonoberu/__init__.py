@@ -8,4 +8,4 @@ __license__ = 'MIT'
 __copyright__ = 'Copyright 2016 Byron'
 __title__ = 'Raitonoberu'
 
-from
+from .Raitonoberu import Raitonoberu

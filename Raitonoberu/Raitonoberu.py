@@ -3,7 +3,7 @@ import aiohttp
 from bs4 import BeautifulSoup
 
 
-class NovelUpdatesAPI:
+class Raitonoberu:
 
     # Baseurl for novelupdates
     BASEURL = 'http://www.novelupdates.com/'
