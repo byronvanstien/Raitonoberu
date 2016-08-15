@@ -8,8 +8,11 @@ class Raitonoberu:
     # Baseurl for novelupdates
     BASEURL = 'http://www.novelupdates.com/'
 
-    def __init__(self):
-        self.session = aiohttp.ClientSession()
+    def __init__(self, user_agent=None, session=None):
+        # Set default user-agent
+        self.headers = user_agent or {"User-Agent": "Raitonoberu"}
+        # Give the user the option of using their own client session
+        self.session = session or aiohttp.ClientSession(headers=self.headers)
 
     # Closes the session on exit, stopping the unclosed client session error
     def __del__(self):
