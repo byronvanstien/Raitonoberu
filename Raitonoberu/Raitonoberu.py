@@ -53,11 +53,15 @@ class Raitonoberu:
                 artists = parse_info.find('a', class_='genre', id='artiststag')
                 # English publisher, defined here so we can account for it if None, e.g. for works unlicensed in English
                 english_publisher = parse_info.find('a', class_='genre', id='myepub')
+                # Publisher, defined here so we can account for it if it's None, e.g. not published
+                publisher = parse_info.find('a', class_='genre', id='myopub')
                 # Accounting for if Artists/English Publisher is None
                 if artists is not None:
                     artists = artists.string
                 if english_publisher is not None:
                     english_publisher = english_publisher.children.string
+                if publisher is not None:
+                    publisher = publisher.string
 
                 # The data to return to the user, in a dictionary
                 data = {'title': parse_info.find('h4', class_='seriestitle new').string,
@@ -72,7 +76,7 @@ class Raitonoberu:
                         'novel_status': parse_info.find('div', id='editstatus').string.strip(),
                         'licensed': True if parse_info.find('div', id='showlicensed').string.strip() == 'Yes' else False,
                         'completely_translated': True if len(list(parse_info.find('div', id='showtranslated').descendants)) > 1 else False,
-                        'publisher': parse_info.find('a', class_='genre', id='myopub').string,
+                        'publisher': publisher,
                         'english_publisher': english_publisher,
                         'description': ' '.join([x.string.strip() for x in list(parse_info.find('div', id='editdescription').children) if x.string.strip()]),
                         'aliases': [x.string for x in parse_info.find('div', id='editassociated') if x.string is not None],
