@@ -4,11 +4,11 @@ setup(
     name='Raitonoberu',
     version='1.0.0',
     packages=['Raitonoberu'],
-    url='https://github.com/GetRektByMe/NovelAPI',
+    url='https://github.com/GetRektByMe/Raitonoberu',
     license='MIT',
     author='Recchan',
     author_email='',
-    description='Python 3 Aiohttp VNDB Scraper',
+    description='Python 3 Aiohttp Novelupdates Scraper',
     long_description='Raitonoberu is a Python 3 Asyncio NovelUpdates Website scraper that is capable of getting useful information for use in applications.',
     classifiers=[
         'Development Status :: 4 - Beta',
