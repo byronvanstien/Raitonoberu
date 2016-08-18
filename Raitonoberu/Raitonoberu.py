@@ -18,7 +18,7 @@ class Raitonoberu:
     def __del__(self):
         self.session.close()
 
-    async def search_novel_updates(self, term: str):
+    async def get_search_page(self, term: str):
         """
         This function will get the first link from the search term we do on term and then it will return the link we want to parse from.
 
@@ -35,7 +35,7 @@ class Raitonoberu:
                 # Raise an error with the response status
                 raise aiohttp.ClientResponseError(response.status)
 
-    async def page_info_parser(self, term: str):
+    async def get_first_search_result(self, term: str):
         """
         This function will parse the information from the link that search_novel_updates returns and then return it as a dictionary
 
