@@ -42,7 +42,7 @@ class Raitonoberu:
         :param term: The novel to search for and parse
         """
         # Uses the other method in the class to search the search page for the actual page that we want
-        to_parse = await self.search_novel_updates(term)
+        to_parse = await self.get_search_page(term)
 
         async with self.session.get(to_parse) as response:
             # If the response is OK
@@ -55,7 +55,7 @@ class Raitonoberu:
                 english_publisher = parse_info.find('a', class_='genre', id='myepub')
                 # Publisher, defined here so we can account for it if it's None, e.g. not published
                 publisher = parse_info.find('a', class_='genre', id='myopub')
-                # Accounting for if Artists/English Publisher is None
+                # Accounting for if Artists/English Publisher/Publisher is None
                 if artists is not None:
                     artists = artists.string
                 if english_publisher is not None:
