@@ -44,7 +44,8 @@ def test_del():
 
 
 @pytest.mark.asyncio
-async def test_get_search_page():
+@pytest.mark.parametrize('term', ['term'])
+async def test_get_search_page(term):
     """test method."""
     from Raitonoberu.raitonoberu import Raitonoberu
     obj = Raitonoberu()
@@ -109,7 +110,7 @@ async def test_get_search_page():
     ]
 
 )
-async def test_get_search_page(term, exp_res):
+async def test_get_first_search_result(term, exp_res):
     """test method."""
     from Raitonoberu.raitonoberu import Raitonoberu
     obj = Raitonoberu()
