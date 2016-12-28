@@ -38,6 +38,34 @@ class Raitonoberu:
                 # Raise an error with the response status
                 raise aiohttp.ClientResponseError(response.status)
 
+    @staticmethod
+    def _get_title(parse_info):
+        """get title from parse info.
+
+        :param parse_info: Parsed info from html soup.
+        """
+        return parse_info.select_one('.seriestitlenu').string
+
+    @staticmethod
+    def _get_novel_status(parse_info):
+        """get title from parse info.
+
+        :param parse_info: Parsed info from html soup.
+        """
+        return parse_info.select_one('#editstatus').text.strip()
+
+    @staticmethod
+    def _get_aliases(parse_info):
+        """get aliases from parse info.
+
+        :param parse_info: Parsed info from html soup.
+        """
+        return [
+            x.string.strip()
+            for x in parse_info.find('div', id='editassociated')
+            if x.string is not None
+        ]
+
     async def get_first_search_result(self, term: str):
         """Get first search result.
 
@@ -75,7 +103,7 @@ class Raitonoberu:
 
                 # The data to return to the user, in a dictionary
                 no_img_found_url = 'http://www.novelupdates.com/img/noimagefound.jpg'
-                data = {'title': parse_info.find('h4', class_='seriestitle new').string,
+                data = {'title': self._get_title(parse_info=parse_info),
                         'cover': (
                             None
                             if parse_info.find('img').get('src') == no_img_found_url
@@ -106,7 +134,7 @@ class Raitonoberu:
                         ),
                         'artists': artists,
                         'year': parse_info.find('div', id='edityear').string.strip(),
-                        'novel_status': parse_info.find('div', id='editstatus').string.strip(),
+                        'novel_status': self._get_novel_status(parse_info=parse_info),
                         'licensed': (
                             True
                             if parse_info.find('div', id='showlicensed').string.strip() == 'Yes'
@@ -132,13 +160,7 @@ class Raitonoberu:
                                 ]
                             )
                         ),
-                        'aliases': (
-                            [
-                                x.string
-                                for x in parse_info.find('div', id='editassociated')
-                                if x.string is not None
-                            ]
-                        ),
+                        'aliases': self._get_aliases(parse_info=parse_info),
                         'link': to_parse}
                 # Returning the dictionary with all of the information
                 # from novelupdates that we parsed
