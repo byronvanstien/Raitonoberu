@@ -117,3 +117,38 @@ async def test_get_first_search_result(term, exp_res):
     res = await obj.get_first_search_result(term=term)
     # test
     assert res == exp_res
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    'term, exp_res',
+    [
+        (
+            'I shall seal the heavens',
+            [
+                'Xian Ni (Shared Universe)',
+                'Beseech The Devil (Shared Universe)',
+                'Against Heaven (Shared Universe)',
+                'A Will Eternal (Shared Universe)'
+            ]
+        ),
+        ('Curing incurable diseases with semen', None),
+        (
+            'S.A.O.',
+            [
+                'Sword Art Online Alternative – Gun Gale Online (Spin-Off)',
+                'Sword Art Online – Progressive (Spin-Off)',
+                'Mahouka Koukou no Rettousei x Sword Art Online (Spin-Off)',
+                'Sword Art Online Alternative – Clover’s Regret (Spin-Off)',
+            ]
+        ),
+    ]
+)
+async def test_related_series(term, exp_res):
+    """test related series category."""
+    from Raitonoberu.raitonoberu import Raitonoberu
+    obj = Raitonoberu()
+    # run
+    res = await obj.get_first_search_result(term=term)
+    # test
+    res['related_series'] == exp_res
