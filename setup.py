@@ -22,4 +22,5 @@ setup(
         'Topic :: Software Development :: Libraries'
     ],
     keywords="NovelUpdates asyncio aiohttp scraping",
+    install_requires=['aiohttp', 'bs4', 'lxml'],
 )
