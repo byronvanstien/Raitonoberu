@@ -1,3 +1,5 @@
+from pprint import  pformat
+
 # Third Party Libraries
 import aiohttp
 from bs4 import BeautifulSoup
@@ -65,6 +67,50 @@ class Raitonoberu:
             for x in parse_info.find('div', id='editassociated')
             if x.string is not None
         ]
+
+    @staticmethod
+    def _get_related_series(parse_info):
+        """get related_series from parse info.
+
+        :param parse_info: Parsed info from html soup.
+        """
+        seriesother_tags = [
+            x for x in parse_info.select('h5.seriesother')]
+        sibling_tag = [x for x in seriesother_tags if x.text == 'Related Series'][0]
+        siblings_tag = list(sibling_tag.next_siblings)
+
+        # filter valid tag
+        # valid tag is all tag before following tag
+        # <h5 class="seriesother">Recommendations</h5>
+        valid_tag = []
+        keypoint_found = False
+        for x in siblings_tag:
+            # change keypoint if condition match
+            if x.name == 'h5' and x.attrs['class'] == ['seriesother']:
+                    keypoint_found = True
+
+            if not keypoint_found and x.strip is not None:
+                if x.strip():
+                    valid_tag.append(x)
+            elif not keypoint_found:
+                valid_tag.append(x)
+
+        # only one item found and it is 'N/A
+        if len(valid_tag) == 1:
+            if valid_tag[0].strip() == 'N/A':
+                return None
+
+        # items are combination between bs4 and text
+        # merge and return them as list of text
+        if len(valid_tag) % 2 == 0:
+            zipped_list = zip(valid_tag[::2], valid_tag[1::2])
+            result = []
+            for x in zipped_list:
+                result.append('{} {}'.format(x[0].text, x[1]))
+            return result
+
+        raise ValueError("Valid tag isn't recognizeable.\n{}".format(pformat(valid_tag)))
+
 
     async def get_first_search_result(self, term: str):
         """Get first search result.
@@ -161,7 +207,8 @@ class Raitonoberu:
                             )
                         ),
                         'aliases': self._get_aliases(parse_info=parse_info),
-                        'link': to_parse}
+                        'link': to_parse,
+                        'related_series': self._get_related_series(parse_info=parse_info)}
                 # Returning the dictionary with all of the information
                 # from novelupdates that we parsed
                 return data
