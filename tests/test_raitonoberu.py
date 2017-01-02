@@ -12,7 +12,6 @@ import pytest
     )
 )
 def test_init(user_agent, session):
-    """test init."""
     with mock.patch('Raitonoberu.raitonoberu.aiohttp') as m_aio:
         from Raitonoberu.raitonoberu import Raitonoberu
         # run
@@ -30,7 +29,6 @@ def test_init(user_agent, session):
 
 
 def test_del():
-    """test __del__ method."""
     session = mock.Mock()
     with mock.patch('Raitonoberu.raitonoberu.Raitonoberu.__init__', return_value=None):
         from Raitonoberu.raitonoberu import Raitonoberu
@@ -45,7 +43,6 @@ def test_del():
 @pytest.mark.asyncio
 @pytest.mark.parametrize('term', ['term'])
 async def test_get_search_page(term):
-    """test method."""
     from Raitonoberu.raitonoberu import Raitonoberu
     obj = Raitonoberu()
     # run
@@ -109,8 +106,9 @@ async def test_get_search_page(term):
     ]
 
 )
+
+
 async def test_get_first_search_result(term, exp_res):
-    """test method."""
     from Raitonoberu.raitonoberu import Raitonoberu
     obj = Raitonoberu()
     # run
