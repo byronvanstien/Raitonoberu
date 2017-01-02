@@ -11,6 +11,8 @@ import pytest
         [None, mock.Mock()]
     )
 )
+
+
 def test_init(user_agent, session):
     with mock.patch('Raitonoberu.raitonoberu.aiohttp') as m_aio:
         from Raitonoberu.raitonoberu import Raitonoberu
