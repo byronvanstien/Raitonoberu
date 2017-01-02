@@ -1,4 +1,3 @@
-"""test module."""
 from unittest import mock
 from itertools import product
 
