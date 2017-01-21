@@ -1,11 +1,8 @@
-from pprint import  pformat
-
-# Third Party Libraries
 import aiohttp
 from bs4 import BeautifulSoup
 
 
-class Raitonoberu:
+class Raitonoberu(object):
 
     # Baseurl for novelupdates
     BASEURL = 'http://www.novelupdates.com/'
@@ -16,8 +13,8 @@ class Raitonoberu:
         # Give the user the option of using their own client session
         self.session = session or aiohttp.ClientSession(headers=self.headers)
 
-    # Closes the session on exit, stopping the unclosed client session error
     def __del__(self):
+        # Silence aiohttp
         self.session.close()
 
     async def get_search_page(self, term: str):
@@ -63,9 +60,9 @@ class Raitonoberu:
         :param parse_info: Parsed info from html soup.
         """
         return [
-            x.string.strip()
-            for x in parse_info.find('div', id='editassociated')
-            if x.string is not None
+            div.string.strip()
+            for div in parse_info.find('div', id='editassociated')
+            if div.string is not None
         ]
 
     @staticmethod
@@ -74,8 +71,7 @@ class Raitonoberu:
 
         :param parse_info: Parsed info from html soup.
         """
-        seriesother_tags = [
-            x for x in parse_info.select('h5.seriesother')]
+        seriesother_tags = [x for x in parse_info.select('h5.seriesother')]
         sibling_tag = [x for x in seriesother_tags if x.text == 'Related Series'][0]
         siblings_tag = list(sibling_tag.next_siblings)
 
@@ -109,8 +105,7 @@ class Raitonoberu:
                 result.append('{} {}'.format(x[0].text, x[1]))
             return result
 
-        raise ValueError("Valid tag isn't recognizeable.\n{}".format(pformat(valid_tag)))
-
+        raise ValueError("Valid tag isn't recognizeable.\n{}".format("\n".join(valid_tag)))
 
     async def get_first_search_result(self, term: str):
         """Get first search result.
