@@ -73,10 +73,7 @@ async def test_get_search_page(term):
                 'artists': None,
                 'authors': ['Jin Yong'],
                 'completely_translated': True,
-                'cover': (
-                    'http://www.novelupdates.com/wp-content/uploads/2015/10'
-                    '/220px-The_Smiling_Proud_Wanderer_笑傲江湖1.jpg'
-                ),
+                'cover': 'http://cdn.novelupdates.com/images/2017/02/IMG_2801.jpg',
                 'description': (
                     'The Smiling, Proud Wanderer is a wuxia novel by Jin Yong (Louis Cha). '
                     'It was first serialised in Hong Kong in the newspaper Ming Pao '
@@ -96,6 +93,7 @@ async def test_get_search_page(term):
                 'link': 'http://www.novelupdates.com/series/smiling-proud-wanderer/',
                 'novel_status': '4 Volumes (Completed)\n40 Chapters (Completed)',
                 'publisher': 'Ming Pao',
+                'related_series': None,
                 'tags': [
                     'Adapted To Drama', 'Adapted to Manhua', 'Adapted To Movie', 'Betrayal',
                     'Misunderstandings', 'Politics', 'Revenge', 'Special Abilities'
@@ -108,8 +106,6 @@ async def test_get_search_page(term):
     ]
 
 )
-
-
 async def test_get_first_search_result(term, exp_res):
     from Raitonoberu.raitonoberu import Raitonoberu
     obj = Raitonoberu()
@@ -152,3 +148,22 @@ async def test_related_series(term, exp_res):
     res = await obj.get_first_search_result(term=term)
     # test
     res['related_series'] == exp_res
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    'term, exp_res',
+    [
+        ['Curing incurable diseases with semen', None],
+        ['S.A.O.', 'Yen Press'],
+        ['I shall seal the heavens', None],
+    ]
+)
+async def test_english_publisher(term, exp_res):
+    """test related series category."""
+    from Raitonoberu.raitonoberu import Raitonoberu
+    obj = Raitonoberu()
+    # run
+    res = await obj.get_first_search_result(term=term)
+    # test
+    res['english_publisher'] == exp_res
