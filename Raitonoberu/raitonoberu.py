@@ -138,7 +138,13 @@ class Raitonoberu(object):
                 if artists is not None:
                     artists = artists.string
                 if english_publisher is not None:
-                    english_publisher = english_publisher.children.string
+                    try:
+                        english_publisher = english_publisher.children.string
+                    except AttributeError:
+                        # english publisher's children tag is not string.
+                        english_publisher = list(english_publisher.children)
+                        if len(english_publisher) == 1:
+                            english_publisher = english_publisher[0]
                 if publisher is not None:
                     publisher = publisher.string
 
